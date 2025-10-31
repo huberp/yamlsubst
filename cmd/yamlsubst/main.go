@@ -55,7 +55,7 @@ func init() {
 
 func run(cmd *cobra.Command, args []string) error {
 	// Read YAML file
-	yamlContent, err := os.ReadFile(yamlFile)
+	yamlContent, err := os.ReadFile(yamlFile) // #nosec G304 -- CLI tool reads user-specified files
 	if err != nil {
 		return fmt.Errorf("failed to read YAML file: %w", err)
 	}
@@ -63,7 +63,7 @@ func run(cmd *cobra.Command, args []string) error {
 	// Read input
 	var input []byte
 	if inputFile != "" {
-		input, err = os.ReadFile(inputFile)
+		input, err = os.ReadFile(inputFile) // #nosec G304 -- CLI tool reads user-specified files
 		if err != nil {
 			return fmt.Errorf("failed to read input file: %w", err)
 		}
