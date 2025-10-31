@@ -144,7 +144,7 @@ yamlsubst --yaml env.yaml --file docker-compose.template.yml > docker-compose.ym
 
 ### Prerequisites
 
-- Go 1.24 or higher
+- Go 1.25.3 or higher
 - Git
 
 ### Building

@@ -16,7 +16,7 @@
 - Cross-architecture: AMD64 and ARM64
 
 ## Technology Stack
-- Go 1.24+ (target 1.25.3 when available)
+- Go 1.25.3
 - github.com/spf13/cobra for CLI
 - gopkg.in/yaml.v3 for YAML parsing
 - Latest golangci-lint for linting
