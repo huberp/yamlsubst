@@ -4,7 +4,7 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "Running Go tests..." -ForegroundColor Green
-go test -v -race -coverprofile=coverage.out ./...
+go test -v -race "-coverprofile=coverage.out" -coverpkg=./pkg/... ./pkg/...
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Tests failed!"

@@ -4,7 +4,7 @@
 set -e
 
 echo "Running Go tests..."
-go test -v -race -coverprofile=coverage.out ./...
+go test -v -race -coverprofile=coverage.out -coverpkg=./pkg/... ./pkg/...
 
 echo ""
 echo "Coverage report:"
