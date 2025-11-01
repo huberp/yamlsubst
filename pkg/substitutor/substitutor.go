@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -43,36 +42,40 @@ func Substitute(input, yamlContent string) (string, error) {
 // navigate traverses the YAML data structure using the given path
 func navigate(data interface{}, path string) interface{} {
 	// Remove leading dot if present
-	path = strings.TrimPrefix(path, ".")
+	if len(path) > 0 && path[0] == '.' {
+		path = path[1:]
+	}
 
 	if path == "" {
 		return data
 	}
 
-	// Split path into parts
-	parts := strings.Split(path, ".")
-
+	// Navigate through path segments without allocating a slice
 	current := data
-	for _, part := range parts {
-		if part == "" {
-			continue
-		}
-
-		switch v := current.(type) {
-		case map[string]interface{}:
-			var ok bool
-			current, ok = v[part]
-			if !ok {
-				return nil
+	start := 0
+	for i := 0; i <= len(path); i++ {
+		if i == len(path) || path[i] == '.' {
+			if i > start {
+				part := path[start:i]
+				
+				switch v := current.(type) {
+				case map[string]interface{}:
+					var ok bool
+					current, ok = v[part]
+					if !ok {
+						return nil
+					}
+				case map[interface{}]interface{}:
+					var ok bool
+					current, ok = v[part]
+					if !ok {
+						return nil
+					}
+				default:
+					return nil
+				}
 			}
-		case map[interface{}]interface{}:
-			var ok bool
-			current, ok = v[part]
-			if !ok {
-				return nil
-			}
-		default:
-			return nil
+			start = i + 1
 		}
 	}
 
