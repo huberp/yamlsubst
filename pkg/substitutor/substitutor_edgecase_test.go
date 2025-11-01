@@ -79,19 +79,19 @@ func TestNavigate_EdgeCases(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := navigate(tt.data, tt.path)
-			
+
 			// For map comparisons, use string representation
 			if result == nil && tt.expected == nil {
 				return
 			}
-			
+
 			if result == nil || tt.expected == nil {
 				if result != tt.expected {
 					t.Errorf("expected %v, got %v", tt.expected, result)
 				}
 				return
 			}
-			
+
 			// Compare string representations for complex types
 			if resStr, ok := result.(string); ok {
 				if expStr, ok := tt.expected.(string); ok {
@@ -101,7 +101,7 @@ func TestNavigate_EdgeCases(t *testing.T) {
 					return
 				}
 			}
-			
+
 			// For maps, just check they're not nil
 			if _, ok := result.(map[string]interface{}); ok {
 				if _, ok := tt.expected.(map[string]interface{}); !ok {

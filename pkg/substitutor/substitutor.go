@@ -57,7 +57,7 @@ func navigate(data interface{}, path string) interface{} {
 		if i == len(path) || path[i] == '.' {
 			if i > start {
 				part := path[start:i]
-				
+
 				switch v := current.(type) {
 				case map[string]interface{}:
 					var ok bool
