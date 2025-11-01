@@ -38,7 +38,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Coverage report:" -ForegroundColor Green
-        go tool cover -func=coverage.out
+        go tool cover -func coverage.out
 
     - name: Create temp directory
       shell: pwsh
