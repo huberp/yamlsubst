@@ -93,8 +93,7 @@ func valueToString(value interface{}) string {
 		return strconv.FormatInt(v, 10)
 	case float64:
 		// Format float without unnecessary trailing zeros
-		s := strconv.FormatFloat(v, 'f', -1, 64)
-		return s
+		return strconv.FormatFloat(v, 'f', -1, 64)
 	case bool:
 		return strconv.FormatBool(v)
 	default:
