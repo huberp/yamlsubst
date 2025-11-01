@@ -9,6 +9,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// placeholderRegex is compiled once for better performance
+var placeholderRegex = regexp.MustCompile(`\$\{(\.[^}]+)\}`)
+
 // Substitute replaces placeholders in the input string with values from the YAML content.
 // Placeholders are in the format ${.path.to.value} where the path is a dot-separated
 // sequence of keys to navigate the YAML structure.
@@ -19,10 +22,7 @@ func Substitute(input, yamlContent string) (string, error) {
 		return "", fmt.Errorf("failed to parse YAML: %w", err)
 	}
 
-	// Find all placeholders in the format ${.path.to.value}
-	re := regexp.MustCompile(`\$\{(\.[^}]+)\}`)
-
-	result := re.ReplaceAllStringFunc(input, func(match string) string {
+	result := placeholderRegex.ReplaceAllStringFunc(input, func(match string) string {
 		// Extract the path (remove ${ and })
 		path := match[2 : len(match)-1] // Remove ${ and }
 
