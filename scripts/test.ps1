@@ -41,7 +41,7 @@ Version: `${.version}
         exit 1
     }
 
-    $RESULT = & "$TEMP_DIR/yamlsubst.exe" --yaml "$TEMP_DIR/values.yaml" --file "$TEMP_DIR/template.txt"
+    $RESULT = (& "$TEMP_DIR/yamlsubst.exe" --yaml "$TEMP_DIR/values.yaml" --file "$TEMP_DIR/template.txt") -join "`r`n"
     $EXPECTED = "Name: TestUser`r`nVersion: 1.0.0"
 
     if ($RESULT -ne $EXPECTED) {
@@ -58,7 +58,7 @@ app:
     port: 8080
 "@ | Out-File -FilePath "$TEMP_DIR/nested.yaml" -Encoding UTF8
 
-    $RESULT = "Server: `${.app.config.host}:`${.app.config.port}" | & "$TEMP_DIR/yamlsubst.exe" --yaml "$TEMP_DIR/nested.yaml"
+    $RESULT = ("Server: `${.app.config.host}:`${.app.config.port}" | & "$TEMP_DIR/yamlsubst.exe" --yaml "$TEMP_DIR/nested.yaml") -join "`r`n"
     $EXPECTED = "Server: localhost:8080"
 
     if ($RESULT -ne $EXPECTED) {
