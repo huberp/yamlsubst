@@ -1,0 +1,116 @@
+name: Debug Test
+
+on:
+  push:
+    branches: [ copilot/create-temp-workflow ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  debug-windows-test:
+    name: Debug Windows Test
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Run Go unit tests
+      shell: pwsh
+      run: |
+        Write-Host "Running Go tests..." -ForegroundColor Green
+        go test -v -race "-coverprofile=coverage.out" -coverpkg=./pkg/... ./pkg/...
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Tests failed!"
+            exit 1
+        }
+
+    - name: Coverage report
+      shell: pwsh
+      run: |
+        Write-Host "Coverage report:" -ForegroundColor Green
+        go tool cover -func=coverage.out
+
+    - name: Create temp directory
+      shell: pwsh
+      run: |
+        $TEMP_DIR = New-Item -ItemType Directory -Path (Join-Path $env:TEMP ([System.IO.Path]::GetRandomFileName()))
+        Write-Host "TEMP_DIR=$TEMP_DIR"
+        "TEMP_DIR=$TEMP_DIR" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Create test files
+      shell: pwsh
+      run: |
+        @"
+        name: TestUser
+        version: 1.0.0
+        "@ | Out-File -FilePath "$env:TEMP_DIR/values.yaml" -Encoding UTF8
+        
+        @"
+        Name: `${.name}
+        Version: `${.version}
+        "@ | Out-File -FilePath "$env:TEMP_DIR/template.txt" -Encoding UTF8
+        
+        Write-Host "Files created in $env:TEMP_DIR"
+        Get-Content "$env:TEMP_DIR/values.yaml" | Format-Hex
+        Get-Content "$env:TEMP_DIR/template.txt" | Format-Hex
+
+    - name: Build binary
+      shell: pwsh
+      run: |
+        go build -o "$env:TEMP_DIR/yamlsubst.exe" ./cmd/yamlsubst
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Build failed!"
+            exit 1
+        }
+        
+        Write-Host "Binary built successfully"
+
+    - name: Run substitution test
+      shell: pwsh
+      run: |
+        $RESULT = & "$env:TEMP_DIR/yamlsubst.exe" --yaml "$env:TEMP_DIR/values.yaml" --file "$env:TEMP_DIR/template.txt"
+        
+        Write-Host "Result type: $($RESULT.GetType().Name)"
+        Write-Host "Result length: $($RESULT.Length)"
+        Write-Host "Result content:"
+        Write-Host $RESULT
+        Write-Host ""
+        Write-Host "Result as bytes:"
+        [System.Text.Encoding]::UTF8.GetBytes($RESULT) | ForEach-Object { Write-Host "$_ (0x$($_.ToString('X2')))" }
+
+    - name: Test comparison
+      shell: pwsh
+      run: |
+        $RESULT = & "$env:TEMP_DIR/yamlsubst.exe" --yaml "$env:TEMP_DIR/values.yaml" --file "$env:TEMP_DIR/template.txt"
+        $EXPECTED = "Name: TestUser`r`nVersion: 1.0.0"
+        
+        Write-Host "EXPECTED type: $($EXPECTED.GetType().Name)"
+        Write-Host "EXPECTED length: $($EXPECTED.Length)"
+        Write-Host "EXPECTED content:"
+        Write-Host $EXPECTED
+        Write-Host ""
+        Write-Host "EXPECTED as bytes:"
+        [System.Text.Encoding]::UTF8.GetBytes($EXPECTED) | ForEach-Object { Write-Host "$_ (0x$($_.ToString('X2')))" }
+        
+        Write-Host ""
+        Write-Host "Comparison result: $($RESULT -eq $EXPECTED)"
+        Write-Host "Comparison (case insensitive): $($RESULT -ieq $EXPECTED)"
+        Write-Host "Comparison (exact binary): $([System.Text.Encoding]::UTF8.GetBytes($RESULT) -join ',' -eq [System.Text.Encoding]::UTF8.GetBytes($EXPECTED) -join ',')"
+
+    - name: Cleanup
+      if: always()
+      shell: pwsh
+      run: |
+        if (Test-Path $env:TEMP_DIR) {
+            Remove-Item -Path $env:TEMP_DIR -Recurse -Force
+        }
