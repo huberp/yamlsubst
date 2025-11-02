@@ -130,9 +130,6 @@ func newParser(input string) *parser {
 // advance moves to the next token
 func (p *parser) advance() {
 	p.current = p.lexer.nextToken()
-	if p.current.typ == tokenError {
-		// This is caught in Parse() or parseExpression()
-	}
 }
 
 // Parse parses the expression and returns an AST node
