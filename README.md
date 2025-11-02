@@ -123,7 +123,7 @@ width: 10
 height: 20
 ```
 ```bash
-echo "Area: ${.width * .height} square units" | yamlsubst --yaml config.yaml
+echo "Area: \${.width * .height} square units" | yamlsubst --yaml config.yaml
 # Output: Area: 200 square units
 ```
 
@@ -145,14 +145,14 @@ offset: 10
 multiplier: 2
 ```
 ```bash
-echo "Result: ${(.base + .offset) * .multiplier}" | yamlsubst --yaml calc.yaml
+echo "Result: \${(.base + .offset) * .multiplier}" | yamlsubst --yaml calc.yaml
 # Output: Result: 120
 ```
 
 **Environment variables in expressions:**
 ```bash
 export PORT=8080
-echo "Next port: ${$PORT + 1}" | yamlsubst --yaml values.yaml
+echo "Next port: \${$PORT + 1}" | yamlsubst --yaml values.yaml
 # Output: Next port: 8081
 ```
 
@@ -163,7 +163,7 @@ base_port: 3000
 ```
 ```bash
 export OFFSET=100
-echo "Port: ${.base_port + $OFFSET}" | yamlsubst --yaml config.yaml
+echo "Port: \${.base_port + $OFFSET}" | yamlsubst --yaml config.yaml
 # Output: Port: 3100
 ```
 
@@ -177,10 +177,10 @@ unit_price: 12.50
 ```
 ```bash
 # Calculate volume and cost
-echo "Volume: ${.length * .width * .depth} cubic units" | yamlsubst --yaml dimensions.yaml
+echo "Volume: \${.length * .width * .depth} cubic units" | yamlsubst --yaml dimensions.yaml
 # Output: Volume: 383.625 cubic units
 
-echo "Cost: \$${.length * .width * .depth * .unit_price}" | yamlsubst --yaml dimensions.yaml
+echo "Cost: \$\${.length * .width * .depth * .unit_price}" | yamlsubst --yaml dimensions.yaml
 # Output: Cost: $4795.3125
 ```
 
@@ -190,7 +190,7 @@ echo "Cost: \$${.length * .width * .depth * .unit_price}" | yamlsubst --yaml dim
 fahrenheit: 68
 ```
 ```bash
-echo "Temperature: ${(.fahrenheit - 32) * 5 / 9}°C" | yamlsubst --yaml weather.yaml
+echo "Temperature: \${(.fahrenheit - 32) * 5 / 9}°C" | yamlsubst --yaml weather.yaml
 # Output: Temperature: 20°C
 ```
 
