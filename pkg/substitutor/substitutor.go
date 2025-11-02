@@ -51,14 +51,15 @@ func evaluateExpression(expression string, yamlData interface{}) (string, error)
 			return 0, fmt.Errorf("empty reference")
 		}
 
-		if ref[0] == '.' {
+		switch ref[0] {
+		case '.':
 			// YAML reference
 			value := navigate(yamlData, ref)
 			if value == nil {
 				return 0, fmt.Errorf("reference not found: %s", ref)
 			}
 			return valueToFloat(value)
-		} else if ref[0] == '$' {
+		case '$':
 			// Environment variable
 			envVar := ref[1:] // Remove $
 			envValue := os.Getenv(envVar)

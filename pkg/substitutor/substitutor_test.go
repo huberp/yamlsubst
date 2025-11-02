@@ -251,58 +251,58 @@ height: 5
 }
 
 func TestSubstitute_EnvVariable(t *testing.T) {
-// Set up test env var
-t.Setenv("TEST_PORT", "8080")
+	// Set up test env var
+	t.Setenv("TEST_PORT", "8080")
 
-yamlContent := `
+	yamlContent := `
 base: 1000
 `
-input := "Result: ${$TEST_PORT + .base}"
-expected := "Result: 9080"
+	input := "Result: ${$TEST_PORT + .base}"
+	expected := "Result: 9080"
 
-result, err := Substitute(input, yamlContent)
-if err != nil {
-t.Fatalf("unexpected error: %v", err)
-}
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-if result != expected {
-t.Errorf("expected %q, got %q", expected, result)
-}
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
 }
 
 func TestSubstitute_EnvVariableOnly(t *testing.T) {
-// Set up test env var
-t.Setenv("TEST_VALUE", "42")
+	// Set up test env var
+	t.Setenv("TEST_VALUE", "42")
 
-yamlContent := `
+	yamlContent := `
 name: test
 `
-input := "Value: ${$TEST_VALUE}"
-expected := "Value: 42"
+	input := "Value: ${$TEST_VALUE}"
+	expected := "Value: 42"
 
-result, err := Substitute(input, yamlContent)
-if err != nil {
-t.Fatalf("unexpected error: %v", err)
-}
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-if result != expected {
-t.Errorf("expected %q, got %q", expected, result)
-}
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
 }
 
 func TestSubstitute_EnvVariableMissing(t *testing.T) {
-yamlContent := `
+	yamlContent := `
 value: 10
 `
-input := "Result: ${$MISSING_VAR + .value}"
-expected := "Result: ${$MISSING_VAR + .value}" // Should keep placeholder as-is
+	input := "Result: ${$MISSING_VAR + .value}"
+	expected := "Result: ${$MISSING_VAR + .value}" // Should keep placeholder as-is
 
-result, err := Substitute(input, yamlContent)
-if err != nil {
-t.Fatalf("unexpected error: %v", err)
-}
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-if result != expected {
-t.Errorf("expected %q, got %q", expected, result)
-}
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
 }
