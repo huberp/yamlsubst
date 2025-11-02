@@ -88,6 +88,120 @@ Examples:
 - `${.person.name}` - nested key
 - `${.app.config.host}` - deeply nested key
 
+### Arithmetic Expressions
+
+yamlsubst supports arithmetic expressions inside placeholders, allowing you to perform calculations using values from YAML files, environment variables, and literal numbers.
+
+#### Supported Operations
+
+- **Addition**: `+`
+- **Subtraction**: `-`
+- **Multiplication**: `*`
+- **Division**: `/`
+- **Parentheses**: `()` for grouping and controlling precedence
+
+#### Operator Precedence
+
+Expressions follow standard mathematical precedence rules:
+1. Parentheses (highest)
+2. Multiplication and Division
+3. Addition and Subtraction (lowest)
+
+#### Expression Components
+
+Expressions can contain:
+- **Literal numbers**: integers and floats (e.g., `42`, `3.14`, `0.5`)
+- **YAML references**: starting with a dot (e.g., `.width`, `.app.config.port`)
+- **Environment variables**: starting with a dollar sign (e.g., `$PORT`, `$DATABASE_PORT`)
+
+#### Examples
+
+**Basic arithmetic with YAML values:**
+```yaml
+# config.yaml
+width: 10
+height: 20
+```
+```bash
+echo "Area: ${.width * .height} square units" | yamlsubst --yaml config.yaml
+# Output: Area: 200 square units
+```
+
+**Combining literals and references:**
+```yaml
+# pricing.yaml
+base_price: 100
+```
+```bash
+echo "Total with tax: \${.base_price * 1.15}" | yamlsubst --yaml pricing.yaml
+# Output: Total with tax: 115
+```
+
+**Using parentheses:**
+```yaml
+# calc.yaml
+base: 50
+offset: 10
+multiplier: 2
+```
+```bash
+echo "Result: ${(.base + .offset) * .multiplier}" | yamlsubst --yaml calc.yaml
+# Output: Result: 120
+```
+
+**Environment variables in expressions:**
+```bash
+export PORT=8080
+echo "Next port: ${$PORT + 1}" | yamlsubst --yaml values.yaml
+# Output: Next port: 8081
+```
+
+**Mixed YAML and environment variables:**
+```yaml
+# config.yaml
+base_port: 3000
+```
+```bash
+export OFFSET=100
+echo "Port: ${.base_port + $OFFSET}" | yamlsubst --yaml config.yaml
+# Output: Port: 3100
+```
+
+**Complex expressions:**
+```yaml
+# dimensions.yaml
+length: 15.5
+width: 8.25
+depth: 3
+unit_price: 12.50
+```
+```bash
+# Calculate volume and cost
+echo "Volume: ${.length * .width * .depth} cubic units" | yamlsubst --yaml dimensions.yaml
+# Output: Volume: 383.625 cubic units
+
+echo "Cost: \$${.length * .width * .depth * .unit_price}" | yamlsubst --yaml dimensions.yaml
+# Output: Cost: $4795.3125
+```
+
+**Temperature conversion:**
+```yaml
+# weather.yaml
+fahrenheit: 68
+```
+```bash
+echo "Temperature: ${(.fahrenheit - 32) * 5 / 9}°C" | yamlsubst --yaml weather.yaml
+# Output: Temperature: 20°C
+```
+
+#### Important Notes
+
+- Division by zero returns an error and leaves the placeholder unchanged
+- All numeric values are processed as floating-point numbers
+- Results are formatted intelligently: whole numbers display without decimals (e.g., `10` not `10.0`)
+- Invalid expressions leave the placeholder unchanged
+- Non-numeric YAML values in arithmetic expressions will cause the placeholder to remain unchanged
+
 ### Command-Line Options
 
 ```
