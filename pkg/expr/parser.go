@@ -3,7 +3,6 @@ package expr
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"unicode"
 )
 
@@ -235,17 +234,28 @@ type Node interface {
 	String() string
 }
 
+// formatFloat formats a float64, converting to int if it's a whole number
+func formatFloat(value float64) string {
+	// Check if the value is within safe integer range
+	const maxSafeInt = 1<<53 - 1
+	if value >= -maxSafeInt && value <= maxSafeInt {
+		// Check if it's effectively an integer (no fractional part)
+		if value == float64(int64(value)) {
+			return strconv.FormatInt(int64(value), 10)
+		}
+	}
+	// Format as float, removing trailing zeros
+	s := strconv.FormatFloat(value, 'f', -1, 64)
+	return s
+}
+
 // NumberNode represents a numeric literal
 type NumberNode struct {
 	Value float64
 }
 
 func (n *NumberNode) String() string {
-	// Check if the value is an integer
-	if n.Value == float64(int64(n.Value)) {
-		return strconv.FormatInt(int64(n.Value), 10)
-	}
-	return strconv.FormatFloat(n.Value, 'f', -1, 64)
+	return formatFloat(n.Value)
 }
 
 // ReferenceNode represents a YAML reference
@@ -320,16 +330,5 @@ func ParseAndEval(input string, resolver func(string) (float64, error)) (float64
 
 // FormatResult formats a float64 result, removing unnecessary decimal points
 func FormatResult(value float64) string {
-	// Check if the value is an integer
-	if value == float64(int64(value)) {
-		return strconv.FormatInt(int64(value), 10)
-	}
-	// Format as float, removing trailing zeros
-	s := strconv.FormatFloat(value, 'f', -1, 64)
-	// Remove trailing zeros after decimal point
-	if strings.Contains(s, ".") {
-		s = strings.TrimRight(s, "0")
-		s = strings.TrimRight(s, ".")
-	}
-	return s
+	return formatFloat(value)
 }
