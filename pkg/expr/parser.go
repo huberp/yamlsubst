@@ -75,7 +75,7 @@ func (l *lexer) nextToken() token {
 		return token{typ: tokenRightParen, value: ")"}
 	}
 
-	// Reference (starts with .)
+	// YAML reference (starts with .)
 	if ch == '.' {
 		start := l.pos
 		l.pos++
@@ -88,6 +88,30 @@ func (l *lexer) nextToken() token {
 			}
 		}
 		return token{typ: tokenReference, value: l.input[start:l.pos]}
+	}
+
+	// Environment variable reference (starts with $)
+	if ch == '$' {
+		start := l.pos
+		l.pos++
+		// Env var name must start with letter or underscore
+		if l.pos < len(l.input) {
+			ch := l.input[l.pos]
+			if unicode.IsLetter(rune(ch)) || ch == '_' {
+				l.pos++
+				for l.pos < len(l.input) {
+					ch := l.input[l.pos]
+					if unicode.IsLetter(rune(ch)) || unicode.IsDigit(rune(ch)) || ch == '_' {
+						l.pos++
+					} else {
+						break
+					}
+				}
+				return token{typ: tokenReference, value: l.input[start:l.pos]}
+			}
+		}
+		// If $ is not followed by valid identifier, treat as error
+		return token{typ: tokenError, value: "$"}
 	}
 
 	// Number (integer or float)
@@ -255,7 +279,7 @@ func (n *NumberNode) String() string {
 	return formatFloat(n.Value)
 }
 
-// ReferenceNode represents a YAML reference
+// ReferenceNode represents a YAML reference or environment variable reference
 type ReferenceNode struct {
 	Path string
 }

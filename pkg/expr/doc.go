@@ -1,13 +1,15 @@
 // Package expr provides an arithmetic expression parser and evaluator.
 // It supports basic arithmetic operations (+, -, *, /) with proper operator
 // precedence and parentheses. Expressions can contain hardcoded numbers
-// (integers and floats) and YAML references starting with a dot.
+// (integers and floats), YAML references starting with a dot, and environment
+// variable references starting with a dollar sign.
 //
 // Example expressions:
 //   - "5 + 3" -> 8
 //   - "2 * (3 + 4)" -> 14
-//   - ".width * .height" -> evaluates references
-//   - "(.base + .offset) * 2" -> complex expression
+//   - ".width * .height" -> evaluates YAML references
+//   - "$PORT + 1000" -> evaluates environment variable
+//   - "(.base + $OFFSET) * 2" -> complex expression with both types
 //
 // Usage:
 //
@@ -18,8 +20,9 @@
 //	}
 //
 //	// Evaluate with a resolver function
-//	resolver := func(path string) (float64, error) {
-//		// Resolve YAML references to their numeric values
+//	resolver := func(ref string) (float64, error) {
+//		// Resolve YAML references (starting with .) or env vars (starting with $)
+//		// to their numeric values
 //		return value, nil
 //	}
 //	result, err := expr.Eval(node, resolver)

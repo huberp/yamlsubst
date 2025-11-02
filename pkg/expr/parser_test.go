@@ -51,6 +51,10 @@ func TestParse_References(t *testing.T) {
 		{"nested reference", ".app.config.port", ".app.config.port"},
 		{"reference with numbers", ".item1.count", ".item1.count"},
 		{"reference with underscore", ".my_value", ".my_value"},
+		{"env var simple", "$PORT", "$PORT"},
+		{"env var uppercase", "$DATABASE_HOST", "$DATABASE_HOST"},
+		{"env var with underscore", "$MY_VAR", "$MY_VAR"},
+		{"env var with numbers", "$VAR123", "$VAR123"},
 	}
 
 	for _, tt := range tests {
@@ -77,6 +81,8 @@ func TestParse_Addition(t *testing.T) {
 		{"no spaces", "10+20", "(10 + 20)"},
 		{"reference and number", ".x + 5", "(.x + 5)"},
 		{"two references", ".a + .b", "(.a + .b)"},
+		{"env var and number", "$PORT + 1000", "($PORT + 1000)"},
+		{"yaml ref and env var", ".base + $OFFSET", "(.base + $OFFSET)"},
 	}
 
 	for _, tt := range tests {
@@ -263,6 +269,9 @@ func TestParse_Errors(t *testing.T) {
 		{"unmatched left paren", "(5 + 3"},
 		{"unmatched right paren", "5 + 3)"},
 		{"invalid token at end", "5 + 3 @"},
+		{"invalid env var dollar only", "$"},
+		{"invalid env var dollar digit", "$123"},
+		{"invalid env var dollar special", "$-VAR"},
 	}
 
 	for _, tt := range tests {
@@ -508,6 +517,30 @@ func TestEval_References(t *testing.T) {
 			"(.base + .offset) * .multiplier / 2",
 			map[string]float64{".base": 10, ".offset": 5, ".multiplier": 4},
 			30,
+		},
+		{
+			"env var simple",
+			"$PORT",
+			map[string]float64{"$PORT": 8080},
+			8080,
+		},
+		{
+			"env var addition",
+			"$PORT + 1000",
+			map[string]float64{"$PORT": 8080},
+			9080,
+		},
+		{
+			"mixed yaml and env",
+			".base + $OFFSET",
+			map[string]float64{".base": 100, "$OFFSET": 50},
+			150,
+		},
+		{
+			"complex with env vars",
+			"($PORT + $OFFSET) * .multiplier",
+			map[string]float64{"$PORT": 8080, "$OFFSET": 20, ".multiplier": 2},
+			16200,
 		},
 	}
 
