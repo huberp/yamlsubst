@@ -2,18 +2,23 @@ package substitutor
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 
+	"github.com/huberp/yamlsubst/pkg/expr"
 	"gopkg.in/yaml.v3"
 )
 
 // placeholderRegex is compiled once for better performance
-var placeholderRegex = regexp.MustCompile(`\$\{(\.[^}]+)\}`)
+// Updated to match any content inside ${...}
+var placeholderRegex = regexp.MustCompile(`\$\{([^}]+)\}`)
 
 // Substitute replaces placeholders in the input string with values from the YAML content.
-// Placeholders are in the format ${.path.to.value} where the path is a dot-separated
-// sequence of keys to navigate the YAML structure.
+// Placeholders are in the format ${expression} where expression can be:
+// - A simple YAML reference: ${.path.to.value}
+// - An environment variable: ${$VAR}
+// - An arithmetic expression: ${.width * .height}, ${$PORT + 1000}, ${.base + $OFFSET}
 func Substitute(input, yamlContent string) (string, error) {
 	// Parse YAML content
 	var data interface{}
@@ -22,21 +27,83 @@ func Substitute(input, yamlContent string) (string, error) {
 	}
 
 	result := placeholderRegex.ReplaceAllStringFunc(input, func(match string) string {
-		// Extract the path (remove ${ and })
-		path := match[2 : len(match)-1] // Remove ${ and }
+		// Extract the expression (remove ${ and })
+		expression := match[2 : len(match)-1] // Remove ${ and }
 
-		// Navigate the YAML structure
-		value := navigate(data, path)
-		if value == nil {
-			// If value not found, keep the placeholder as-is
+		// Try to evaluate as expression
+		value, err := evaluateExpression(expression, data)
+		if err != nil {
+			// If evaluation fails, keep the placeholder as-is
 			return match
 		}
 
-		// Convert value to string
-		return valueToString(value)
+		return value
 	})
 
 	return result, nil
+}
+
+// evaluateExpression evaluates an expression which can be a simple reference or arithmetic expression
+func evaluateExpression(expression string, yamlData interface{}) (string, error) {
+	// Create a resolver function that can handle both YAML refs and env vars
+	resolver := func(ref string) (float64, error) {
+		if len(ref) == 0 {
+			return 0, fmt.Errorf("empty reference")
+		}
+
+		if ref[0] == '.' {
+			// YAML reference
+			value := navigate(yamlData, ref)
+			if value == nil {
+				return 0, fmt.Errorf("reference not found: %s", ref)
+			}
+			return valueToFloat(value)
+		} else if ref[0] == '$' {
+			// Environment variable
+			envVar := ref[1:] // Remove $
+			envValue := os.Getenv(envVar)
+			if envValue == "" {
+				return 0, fmt.Errorf("env var not found: %s", envVar)
+			}
+			return strconv.ParseFloat(envValue, 64)
+		}
+
+		return 0, fmt.Errorf("invalid reference: %s", ref)
+	}
+
+	// Try to parse and evaluate as expression
+	result, err := expr.ParseAndEval(expression, resolver)
+	if err != nil {
+		// If it's not a valid expression, it might be a simple string reference
+		// Try to navigate directly (for backward compatibility with non-numeric values)
+		if expression[0] == '.' {
+			value := navigate(yamlData, expression)
+			if value != nil {
+				return valueToString(value), nil
+			}
+		}
+		return "", err
+	}
+
+	// Format the numeric result
+	return expr.FormatResult(result), nil
+}
+
+// valueToFloat converts a value to float64 for expression evaluation
+func valueToFloat(value interface{}) (float64, error) {
+	switch v := value.(type) {
+	case int:
+		return float64(v), nil
+	case int64:
+		return float64(v), nil
+	case float64:
+		return v, nil
+	case string:
+		// Try to parse string as float
+		return strconv.ParseFloat(v, 64)
+	default:
+		return 0, fmt.Errorf("cannot convert to float: %v", value)
+	}
 }
 
 // navigate traverses the YAML data structure using the given path

@@ -123,3 +123,186 @@ name: John
 		t.Errorf("expected %q, got %q", expected, result)
 	}
 }
+
+func TestSubstitute_SimpleExpression(t *testing.T) {
+	yamlContent := `
+width: 10
+height: 5
+`
+	input := "Area: ${.width * .height}"
+	expected := "Area: 50"
+
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestSubstitute_ExpressionWithAddition(t *testing.T) {
+	yamlContent := `
+base: 100
+offset: 25
+`
+	input := "Total: ${.base + .offset}"
+	expected := "Total: 125"
+
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestSubstitute_ComplexExpression(t *testing.T) {
+	yamlContent := `
+width: 10
+height: 5
+padding: 2
+`
+	input := "Result: ${(.width + .padding) * (.height + .padding)}"
+	expected := "Result: 84"
+
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestSubstitute_ExpressionWithLiteral(t *testing.T) {
+	yamlContent := `
+base: 100
+`
+	input := "Result: ${.base * 2 + 50}"
+	expected := "Result: 250"
+
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestSubstitute_ExpressionWithFloats(t *testing.T) {
+	yamlContent := `
+price: 19.99
+quantity: 3
+`
+	input := "Total: ${.price * .quantity}"
+	expected := "Total: 59.97"
+
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestSubstitute_InvalidExpression(t *testing.T) {
+	yamlContent := `
+value: 10
+`
+	input := "Result: ${.value +}"
+	expected := "Result: ${.value +}" // Should keep placeholder as-is
+
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestSubstitute_MixedSimpleAndExpression(t *testing.T) {
+	yamlContent := `
+name: Test
+width: 10
+height: 5
+`
+	input := "Name: ${.name}, Area: ${.width * .height}"
+	expected := "Name: Test, Area: 50"
+
+	result, err := Substitute(input, yamlContent)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestSubstitute_EnvVariable(t *testing.T) {
+// Set up test env var
+t.Setenv("TEST_PORT", "8080")
+
+yamlContent := `
+base: 1000
+`
+input := "Result: ${$TEST_PORT + .base}"
+expected := "Result: 9080"
+
+result, err := Substitute(input, yamlContent)
+if err != nil {
+t.Fatalf("unexpected error: %v", err)
+}
+
+if result != expected {
+t.Errorf("expected %q, got %q", expected, result)
+}
+}
+
+func TestSubstitute_EnvVariableOnly(t *testing.T) {
+// Set up test env var
+t.Setenv("TEST_VALUE", "42")
+
+yamlContent := `
+name: test
+`
+input := "Value: ${$TEST_VALUE}"
+expected := "Value: 42"
+
+result, err := Substitute(input, yamlContent)
+if err != nil {
+t.Fatalf("unexpected error: %v", err)
+}
+
+if result != expected {
+t.Errorf("expected %q, got %q", expected, result)
+}
+}
+
+func TestSubstitute_EnvVariableMissing(t *testing.T) {
+yamlContent := `
+value: 10
+`
+input := "Result: ${$MISSING_VAR + .value}"
+expected := "Result: ${$MISSING_VAR + .value}" // Should keep placeholder as-is
+
+result, err := Substitute(input, yamlContent)
+if err != nil {
+t.Fatalf("unexpected error: %v", err)
+}
+
+if result != expected {
+t.Errorf("expected %q, got %q", expected, result)
+}
+}
