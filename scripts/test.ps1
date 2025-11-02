@@ -74,7 +74,7 @@ app:
     }
 
     # Test 4: Help command
-    $HELP_OUTPUT = & "$TEMP_DIR/yamlsubst.exe" --help
+    $HELP_OUTPUT = (& "$TEMP_DIR/yamlsubst.exe" --help) -join "`n"
     if ($HELP_OUTPUT -notmatch "yamlsubst is a CLI tool") {
         Write-Error "Help command test failed!"
         exit 1
