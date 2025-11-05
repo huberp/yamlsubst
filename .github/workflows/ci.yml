@@ -73,6 +73,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
+        # GoReleaser needs full git history for version tags and changelog
         fetch-depth: 0
 
     - name: Set up Go
