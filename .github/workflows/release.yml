@@ -16,6 +16,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
+        # GoReleaser needs full git history for version tags and changelog
         fetch-depth: 0
 
     - name: Set up Go
@@ -26,17 +27,11 @@ jobs:
     - name: Run tests
       run: ./scripts/test.sh
 
-    - name: Build binaries
-      run: ./scripts/build.sh
-      env:
-        VERSION: ${{ github.ref_name }}
-        COMMIT: ${{ github.sha }}
-        DATE: ${{ github.event.head_commit.timestamp }}
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@v6
       with:
-        files: dist/*
-        generate_release_notes: true
-        draft: false
-        prerelease: false
+        distribution: goreleaser
+        version: '~> v2'
+        args: release --clean
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
