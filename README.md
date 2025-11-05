@@ -27,12 +27,7 @@ Download the latest release for your platform from the [releases page](https://g
 ```bash
 git clone https://github.com/huberp/yamlsubst.git
 cd yamlsubst
-./scripts/build.sh
-```
-
-Or on Windows:
-```powershell
-./scripts/build.ps1
+go build -o yamlsubst ./cmd/yamlsubst
 ```
 
 ### Install with Go
@@ -267,8 +262,8 @@ yamlsubst --yaml env.yaml --file docker-compose.template.yml > docker-compose.ym
 # Build for current platform
 go build -o yamlsubst ./cmd/yamlsubst
 
-# Build for all platforms
-./scripts/build.sh
+# Build for all platforms using GoReleaser
+goreleaser build --snapshot --clean
 ```
 
 ### Testing
