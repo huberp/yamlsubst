@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/huberp/yamlsubst/actions/workflows/ci.yml/badge.svg)](https://github.com/huberp/yamlsubst/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/huberp/yamlsubst)](https://goreportcard.com/report/github.com/huberp/yamlsubst)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/huberp/yamlsubst)](https://github.com/huberp/yamlsubst/blob/main/go.mod)
 [![codecov](https://codecov.io/gh/huberp/yamlsubst/branch/main/graph/badge.svg)](https://codecov.io/gh/huberp/yamlsubst)
 [![License](https://img.shields.io/github/license/huberp/yamlsubst)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/huberp/yamlsubst)](https://github.com/huberp/yamlsubst/releases)
