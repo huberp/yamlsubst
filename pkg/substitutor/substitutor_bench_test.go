@@ -13,7 +13,7 @@ age: 30
 	input := "Hello, my name is ${.name} and I am ${.age} years old"
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := Substitute(input, yamlContent)
 		if err != nil {
 			b.Fatal(err)
@@ -32,7 +32,7 @@ person:
 	input := "I live in ${.person.address.city}, ${.person.address.state}"
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := Substitute(input, yamlContent)
 		if err != nil {
 			b.Fatal(err)
@@ -47,7 +47,7 @@ word: test
 	input := strings.Repeat("${.word} ", 100)
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := Substitute(input, yamlContent)
 		if err != nil {
 			b.Fatal(err)
@@ -65,7 +65,7 @@ city: Seattle
 	input := strings.Repeat(template, 1000)
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := Substitute(input, yamlContent)
 		if err != nil {
 			b.Fatal(err)

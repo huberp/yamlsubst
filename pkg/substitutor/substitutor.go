@@ -21,7 +21,7 @@ var placeholderRegex = regexp.MustCompile(`\$\{([^}]+)\}`)
 // - An arithmetic expression: ${.width * .height}, ${$PORT + 1000}, ${.base + $OFFSET}
 func Substitute(input, yamlContent string) (string, error) {
 	// Parse YAML content
-	var data interface{}
+	var data any
 	if err := yaml.Unmarshal([]byte(yamlContent), &data); err != nil {
 		return "", fmt.Errorf("failed to parse YAML: %w", err)
 	}
@@ -44,7 +44,7 @@ func Substitute(input, yamlContent string) (string, error) {
 }
 
 // evaluateExpression evaluates an expression which can be a simple reference or arithmetic expression
-func evaluateExpression(expression string, yamlData interface{}) (string, error) {
+func evaluateExpression(expression string, yamlData any) (string, error) {
 	// Create a resolver function that can handle both YAML refs and env vars
 	resolver := func(ref string) (float64, error) {
 		if len(ref) == 0 {
@@ -91,7 +91,7 @@ func evaluateExpression(expression string, yamlData interface{}) (string, error)
 }
 
 // valueToFloat converts a value to float64 for expression evaluation
-func valueToFloat(value interface{}) (float64, error) {
+func valueToFloat(value any) (float64, error) {
 	switch v := value.(type) {
 	case int:
 		return float64(v), nil
@@ -108,7 +108,7 @@ func valueToFloat(value interface{}) (float64, error) {
 }
 
 // navigate traverses the YAML data structure using the given path
-func navigate(data interface{}, path string) interface{} {
+func navigate(data any, path string) any {
 	// Remove leading dot if present
 	if len(path) > 0 && path[0] == '.' {
 		path = path[1:]
@@ -127,13 +127,13 @@ func navigate(data interface{}, path string) interface{} {
 				part := path[start:i]
 
 				switch v := current.(type) {
-				case map[string]interface{}:
+				case map[string]any:
 					var ok bool
 					current, ok = v[part]
 					if !ok {
 						return nil
 					}
-				case map[interface{}]interface{}:
+				case map[any]any:
 					var ok bool
 					current, ok = v[part]
 					if !ok {
@@ -151,7 +151,7 @@ func navigate(data interface{}, path string) interface{} {
 }
 
 // valueToString converts a value to its string representation
-func valueToString(value interface{}) string {
+func valueToString(value any) string {
 	switch v := value.(type) {
 	case string:
 		return v
