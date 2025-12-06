@@ -6,39 +6,39 @@ import "testing"
 func TestNavigate_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name     string
-		data     interface{}
+		data     any
 		path     string
-		expected interface{}
+		expected any
 	}{
 		{
 			name:     "empty path",
-			data:     map[string]interface{}{"key": "value"},
+			data:     map[string]any{"key": "value"},
 			path:     "",
-			expected: map[string]interface{}{"key": "value"},
+			expected: map[string]any{"key": "value"},
 		},
 		{
 			name:     "just dot",
-			data:     map[string]interface{}{"key": "value"},
+			data:     map[string]any{"key": "value"},
 			path:     ".",
-			expected: map[string]interface{}{"key": "value"},
+			expected: map[string]any{"key": "value"},
 		},
 		{
 			name:     "leading dot",
-			data:     map[string]interface{}{"key": "value"},
+			data:     map[string]any{"key": "value"},
 			path:     ".key",
 			expected: "value",
 		},
 		{
 			name:     "no leading dot",
-			data:     map[string]interface{}{"key": "value"},
+			data:     map[string]any{"key": "value"},
 			path:     "key",
 			expected: "value",
 		},
 		{
 			name: "nested path",
-			data: map[string]interface{}{
-				"level1": map[string]interface{}{
-					"level2": map[string]interface{}{
+			data: map[string]any{
+				"level1": map[string]any{
+					"level2": map[string]any{
 						"level3": "deep",
 					},
 				},
@@ -48,7 +48,7 @@ func TestNavigate_EdgeCases(t *testing.T) {
 		},
 		{
 			name: "map[interface{}]interface{} type",
-			data: map[interface{}]interface{}{
+			data: map[any]any{
 				"key": "value",
 			},
 			path:     "key",
@@ -56,7 +56,7 @@ func TestNavigate_EdgeCases(t *testing.T) {
 		},
 		{
 			name:     "non-existent key",
-			data:     map[string]interface{}{"key": "value"},
+			data:     map[string]any{"key": "value"},
 			path:     "missing",
 			expected: nil,
 		},
@@ -68,7 +68,7 @@ func TestNavigate_EdgeCases(t *testing.T) {
 		},
 		{
 			name: "path stops at non-map",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"key": "value",
 			},
 			path:     "key.deeper",
@@ -103,8 +103,8 @@ func TestNavigate_EdgeCases(t *testing.T) {
 			}
 
 			// For maps, just check they're not nil
-			if _, ok := result.(map[string]interface{}); ok {
-				if _, ok := tt.expected.(map[string]interface{}); !ok {
+			if _, ok := result.(map[string]any); ok {
+				if _, ok := tt.expected.(map[string]any); !ok {
 					t.Errorf("expected map but got different type")
 				}
 				return
@@ -117,7 +117,7 @@ func TestNavigate_EdgeCases(t *testing.T) {
 func TestValueToString_AllTypes(t *testing.T) {
 	tests := []struct {
 		name     string
-		value    interface{}
+		value    any
 		expected string
 	}{
 		{"string", "hello", "hello"},
