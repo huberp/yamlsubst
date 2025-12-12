@@ -53,6 +53,6 @@ on:
 5. **Document inputs** - Clearly state what inputs the workflow requires
 6. **Document outputs** - Clearly state what outputs the workflow requires
 7. **Document secrets** - Clearly state what github secrets the workflow requires
-5. **Document variables** - Clearly state what github variables the workflow requires
-6. **Document precondition** - Clearly state what type of setup has to be done before the workflow can be done
-8. **Use consistent formatting** - Follow the exact format shown in the template
+8. **Document variables** - Clearly state what github variables the workflow requires
+9. **Document precondition** - Clearly state what type of setup has to be done before the workflow can be done
+10. **Use consistent formatting** - Follow the exact format shown in the template
