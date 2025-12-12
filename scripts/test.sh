@@ -4,7 +4,7 @@
 set -e
 
 echo "Running Go tests..."
-go test -v -race -coverprofile=coverage.out -coverpkg=./pkg/... ./pkg/...
+go test -v -race -coverprofile=coverage.out -covermode=atomic -coverpkg=./pkg/... ./pkg/...
 
 echo ""
 echo "Coverage report:"
