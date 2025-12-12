@@ -290,6 +290,88 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 golangci-lint run
 ```
 
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment.
+
+### Workflows
+
+#### CI Workflow (`ci.yml`)
+Runs on every push to `main` and on pull requests. Performs:
+- **Test Job**: Runs unit tests with race detection and coverage reporting on Linux and Windows
+  - Uses `go test -v -race -coverprofile=coverage.out -covermode=atomic`
+  - Uploads coverage to Codecov (Linux only)
+- **Lint Job**: Runs `golangci-lint` with comprehensive linter configuration
+- **Build Job**: Creates snapshot builds using GoReleaser to verify build process
+  - Uploads build artifacts for verification
+
+**Triggers:**
+- Push to `main` branch (when Go files, go.mod, go.sum, or CI scripts change)
+- Pull requests to `main`
+
+#### Release Workflow (`release.yml`)
+Runs on version tags (e.g., `v1.0.0`). Performs:
+- Runs full test suite
+- Builds binaries for multiple platforms using GoReleaser:
+  - **Operating Systems**: Linux, Windows, macOS
+  - **Architectures**: AMD64, ARM64
+- Embeds version, commit hash, and build date into binaries via ldflags
+- Creates GitHub release with:
+  - Changelog
+  - Binary artifacts for all platforms
+  - Checksums
+
+**Triggers:**
+- Tags matching `v*` (e.g., `v1.0.0`, `v2.1.3`)
+
+#### Dependency Submission Workflow (`go-dependency-submission.yml`)
+Submits Go module dependencies to GitHub for security scanning.
+
+**Triggers:**
+- Push to `main` when `go.mod` changes
+
+### Version Information
+
+The application embeds version information at build time:
+
+```bash
+yamlsubst version
+# Output: yamlsubst version v1.0.0 (commit: abc123, built: 2024-01-01T00:00:00Z)
+```
+
+Version information is set via ldflags during build:
+- `version`: Set from git tag (e.g., `v1.0.0`) or `dev` for development builds
+- `commit`: Full commit hash
+- `date`: Build timestamp
+
+### Creating a Release
+
+To create a new release:
+
+1. Ensure all changes are committed and pushed to `main`
+2. Create and push a semantic version tag:
+   ```bash
+   git tag -a v1.0.0 -m "Release v1.0.0"
+   git push origin v1.0.0
+   ```
+3. GitHub Actions will automatically:
+   - Run tests
+   - Build binaries for all platforms
+   - Create a GitHub release
+   - Upload binaries and checksums
+
+### Development Builds
+
+For local development with version embedding:
+
+```bash
+# Development build
+go build -ldflags "-X main.version=dev -X main.commit=$(git rev-parse HEAD) -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o yamlsubst ./cmd/yamlsubst
+
+# Or use GoReleaser for snapshot builds
+goreleaser build --snapshot --clean
+```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
