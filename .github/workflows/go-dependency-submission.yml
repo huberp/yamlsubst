@@ -1,5 +1,16 @@
 name: Go Dependency Submission
 
+# ============================================================
+# Purpose: Submit Go module dependencies to GitHub's dependency graph for security analysis
+# Triggers: push to main when go.mod changes
+# Permissions: contents:write
+# Inputs: None
+# Outputs: Dependency graph submission to GitHub
+# Secrets: None
+# Variables: None
+# Preconditions: None
+# ============================================================
+
 on:
   push:
     branches:
