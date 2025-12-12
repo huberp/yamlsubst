@@ -16,7 +16,7 @@ Every workflow file must start with a structured comment header immediately afte
 # Inputs: [What Inputs the Workflow is using, can be empty]
 # Outputs: [What outputs the workflow is creating, can be empty]
 # Secrets: [Which Secrets the Workflow needs]
-# Variables [What Variables are used]
+# Variables: [What Variables are used]
 # Precondition [For instance any plumbing required like IdP Trust Relations]
 # ============================================================
 ```
