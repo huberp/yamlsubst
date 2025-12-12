@@ -1,5 +1,16 @@
 name: Release
 
+# ============================================================
+# Purpose: Build and publish releases with multi-platform binaries using GoReleaser
+# Triggers: push of version tags (v*)
+# Permissions: contents:write
+# Inputs: None
+# Outputs: GitHub release with multi-platform binaries, changelog
+# Secrets: GITHUB_TOKEN (auto-provided)
+# Variables: None
+# Preconditions: None
+# ============================================================
+
 on:
   push:
     tags:

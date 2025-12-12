@@ -1,5 +1,16 @@
 name: CI
 
+# ============================================================
+# Purpose: Run linting, tests, and multi-platform builds on push/PR
+# Triggers: push to main (Go files, go.mod, go.sum, workflow/script changes), pull requests to main
+# Permissions: contents:read
+# Inputs: None
+# Outputs: Build artifacts uploaded as binaries, test coverage uploaded to Codecov
+# Secrets: None
+# Variables: None
+# Preconditions: None
+# ============================================================
+
 on:
   push:
     branches: [ main ]
