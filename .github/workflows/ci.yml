@@ -1,9 +1,9 @@
 name: CI
 
 # ============================================================
-# Purpose: Run linting, tests, and multi-platform builds on push/PR
+# Purpose: Run dependency review, linting, tests, and multi-platform builds on push/PR
 # Triggers: push to main (Go files, go.mod, go.sum, workflow/script changes), pull requests to main
-# Permissions: contents:read
+# Permissions: contents:read, pull-requests:write (for dependency review)
 # Inputs: None
 # Outputs: Build artifacts uploaded as binaries, test coverage uploaded to Codecov
 # Secrets: None
@@ -26,8 +26,23 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+
   test:
     name: Test
     runs-on: ${{ matrix.os }}
@@ -84,7 +99,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test, lint, dependency-review]
+    if: always() && (needs.test.result == 'success' && needs.lint.result == 'success' && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped'))
     permissions:
       contents: read
     steps:
